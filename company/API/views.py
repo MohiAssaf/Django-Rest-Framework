@@ -105,6 +105,8 @@ class EmployeeList(APIView):
 
 class EmployeeDetail(APIView):
     
+    # Retrieve, update or delete a employee instance #
+    
     def get_object(self, pk):
         try:
             return Employee.objects.get(pk=pk)
