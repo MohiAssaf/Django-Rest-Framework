@@ -1,9 +1,79 @@
-from django.urls import reverse
-from rest_framework.test import APITestCase
+from django.test import TestCase
 from rest_framework import status
-from .models import Employee
+from rest_framework.test import APIClient
+from django.urls import reverse
+from .models import Company, Employee
+from rest_framework.test import APITestCase
 
-class EmployeeTests(APITestCase):
+
+class CompanyAPITest(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+
+        self.valid_company_data = {
+            "name": "Adiiidas",
+            "logo": "",
+            "description": "this is the adidas company welco",
+        }
+
+        self.invalid_company_data = {
+            "logo": "https://example.com/logo.png",
+            "description": "a sa aaaaaa"
+        }
+
+    def test_create_valid_company(self):
+        response = self.client.post(
+            reverse('company-list'),
+            data=self.valid_company_data,
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_create_invalid_company(self):
+        response = self.client.post(
+            reverse('company-list'),
+            data=self.invalid_company_data,
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_retrieve_company(self):
+        company = Company.objects.create(
+            name="nike",
+            logo="https://example.com/logo.png",
+            description="nike is a great company"
+        )
+        response = self.client.get(reverse('company-detail', args=[company.id]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_update_company(self):
+        company = Company.objects.create(
+            name="puma",
+            logo="https://example.com/logo.png",
+            description="puma is a great company"
+        )
+        response = self.client.put(
+            reverse('company-detail', args=[company.id]),
+            data={
+                "name": "rebook",
+                "logo": "https://example.com/logo.png",
+                "description": "rebook is a great company"
+            },
+            format='json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_delete_company(self):
+        company = Company.objects.create(
+            name="nike",
+            logo="https://example.com/logo.png",
+            description="nike is a company"
+        )
+        response = self.client.delete(reverse('company-detail', args=[company.id]))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+
+class EmployeeTests(TestCase):
 
     def setUp(self):
         self.valid_payload = {
